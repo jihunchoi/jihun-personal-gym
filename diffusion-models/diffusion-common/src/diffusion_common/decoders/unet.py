@@ -37,6 +37,7 @@ class ResUNetResidualBlock(nn.Module):
             conv1_layers = conv1_layers[2:]
         self.conv1 = nn.Sequential(*conv1_layers)
 
+        self.skip_conv: nn.Module
         if in_channels == out_channels and not halve_size:
             self.skip_conv = nn.Identity()
         else:

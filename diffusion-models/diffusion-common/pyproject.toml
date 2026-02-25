@@ -7,5 +7,15 @@ requires-python = ">=3.13"
 dependencies = [
     "gdown>=5.2.0",
     "jupyterlab>=4.5.1",
+    "pyrefly>=0.54.0",
+    "torch>=2.10.0",
     "torchvision>=0.24.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
 ]

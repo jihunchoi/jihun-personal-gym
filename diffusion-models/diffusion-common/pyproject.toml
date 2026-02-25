@@ -23,6 +23,12 @@ packages = ["src/diffusion_common"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 
+[tool.ruff]
+extend-include = ["*.ipynb"]
+
+[tool.pyrefly]
+project_includes = ["src", "tests", "*.ipynb"]
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",

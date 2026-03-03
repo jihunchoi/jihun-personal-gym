@@ -3,7 +3,8 @@
 
 import torch
 from torch import nn
-from ..utils.sinusoidal_embedding import SinusoidalEmbedding
+from diffusion_common.decoders.base import Decoder
+from diffusion_common.utils.sinusoidal_embedding import SinusoidalEmbedding
 
 
 class ResUNetResidualBlock(nn.Module):
@@ -139,7 +140,7 @@ class ResUNetBridgeBlock(nn.Module):
         return self.res_block(x, t_emb)
 
 
-class ResUNet(nn.Module):
+class ResUNet(Decoder):
     def __init__(
         self,
         input_dim: int,

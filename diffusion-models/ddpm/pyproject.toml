@@ -3,7 +3,7 @@ name = "ddpm"
 version = "0.1.0"
 description = "Denoising Diffusion Probabilistic Models (DDPM) implementation"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "diffusion-common",
     "pyrefly>=0.54.0",

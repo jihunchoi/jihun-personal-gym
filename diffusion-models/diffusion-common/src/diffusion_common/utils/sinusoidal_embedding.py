@@ -9,6 +9,8 @@ class SinusoidalEmbedding(nn.Module):
     Used commonly in DDPM for time embeddings.
     """
 
+    inv_freq: Tensor
+
     def __init__(self, dim: int, base: int = 10000):
         """
         Initializes the embedding module.

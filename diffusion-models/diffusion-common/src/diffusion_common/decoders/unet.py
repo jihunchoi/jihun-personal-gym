@@ -68,17 +68,21 @@ class ResUNetResidualBlock(nn.Module):
 
     def forward(self, x: torch.Tensor, t_emb: torch.Tensor) -> torch.Tensor:
         x1 = self.conv1(x)
-        
+
         # Add time embedding: (B, C, 1, 1)
         x1 = x1 + self.time_proj(t_emb)[:, :, None, None]
-        
+
         x2 = self.conv2(x1)
         return self.skip_conv(x) + x2
 
 
 class ResUNetEncoderBlock(nn.Module):
     def __init__(
-        self, in_channels: int, out_channels: int, time_embedding_dim: int, input_is_data: bool = False
+        self,
+        in_channels: int,
+        out_channels: int,
+        time_embedding_dim: int,
+        input_is_data: bool = False,
     ) -> None:
         super().__init__()
 
@@ -99,7 +103,13 @@ class ResUNetEncoderBlock(nn.Module):
 
 
 class ResUNetDecoderBlock(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, skip_channels: int, time_embedding_dim: int) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        skip_channels: int,
+        time_embedding_dim: int,
+    ) -> None:
         super().__init__()
 
         self.in_channels = in_channels
@@ -116,13 +126,17 @@ class ResUNetDecoderBlock(nn.Module):
             halve_size=False,
         )
 
-    def forward(self, x: torch.Tensor, skip: torch.Tensor, t_emb: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, skip: torch.Tensor, t_emb: torch.Tensor
+    ) -> torch.Tensor:
         x1 = self.upsampler(x)
         return self.res_block(torch.cat([x1, skip], dim=1), t_emb)
 
 
 class ResUNetBridgeBlock(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, time_embedding_dim: int) -> None:
+    def __init__(
+        self, in_channels: int, out_channels: int, time_embedding_dim: int
+    ) -> None:
         super().__init__()
 
         self.in_channels = in_channels
@@ -159,7 +173,7 @@ class ResUNet(Decoder):
 
         encoder_dims = layer_dims
         decoder_dims = layer_dims[::-1]
-        
+
         # Time embedding
         self.time_embedder = SinusoidalEmbedding(time_embedding_dim)
         self.time_mlp = nn.Sequential(
@@ -183,7 +197,7 @@ class ResUNet(Decoder):
 
         # Bridge block
         self.bridge = ResUNetBridgeBlock(
-            in_channels=encoder_dims[-1], 
+            in_channels=encoder_dims[-1],
             out_channels=bridge_dim,
             time_embedding_dim=time_embedding_dim,
         )

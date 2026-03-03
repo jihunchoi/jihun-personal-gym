@@ -15,7 +15,9 @@ def test_residual_block_no_halve():
     batch_size = 2
     h, w = 32, 32
 
-    block = ResUNetResidualBlock(in_channels, out_channels, time_embedding_dim, halve_size=False)
+    block = ResUNetResidualBlock(
+        in_channels, out_channels, time_embedding_dim, halve_size=False
+    )
     x = torch.randn(batch_size, in_channels, h, w)
     t_emb = torch.randn(batch_size, time_embedding_dim)
     output = block(x, t_emb)
@@ -30,7 +32,9 @@ def test_residual_block_halve():
     batch_size = 2
     h, w = 32, 32
 
-    block = ResUNetResidualBlock(in_channels, out_channels, time_embedding_dim, halve_size=True)
+    block = ResUNetResidualBlock(
+        in_channels, out_channels, time_embedding_dim, halve_size=True
+    )
     x = torch.randn(batch_size, in_channels, h, w)
     t_emb = torch.randn(batch_size, time_embedding_dim)
     output = block(x, t_emb)
@@ -45,7 +49,9 @@ def test_encoder_block_input_data():
     batch_size = 2
     h, w = 32, 32
 
-    block = ResUNetEncoderBlock(in_channels, out_channels, time_embedding_dim, input_is_data=True)
+    block = ResUNetEncoderBlock(
+        in_channels, out_channels, time_embedding_dim, input_is_data=True
+    )
     x = torch.randn(batch_size, in_channels, h, w)
     t_emb = torch.randn(batch_size, time_embedding_dim)
     output = block(x, t_emb)
@@ -60,7 +66,9 @@ def test_encoder_block_halve():
     batch_size = 2
     h, w = 32, 32
 
-    block = ResUNetEncoderBlock(in_channels, out_channels, time_embedding_dim, input_is_data=False)
+    block = ResUNetEncoderBlock(
+        in_channels, out_channels, time_embedding_dim, input_is_data=False
+    )
     x = torch.randn(batch_size, in_channels, h, w)
     t_emb = torch.randn(batch_size, time_embedding_dim)
     output = block(x, t_emb)
@@ -91,7 +99,9 @@ def test_decoder_block():
     batch_size = 2
     h, w = 8, 8
 
-    block = ResUNetDecoderBlock(in_channels, out_channels, skip_channels, time_embedding_dim)
+    block = ResUNetDecoderBlock(
+        in_channels, out_channels, skip_channels, time_embedding_dim
+    )
     x = torch.randn(batch_size, in_channels, h, w)
     skip = torch.randn(batch_size, skip_channels, h * 2, w * 2)
     t_emb = torch.randn(batch_size, time_embedding_dim)

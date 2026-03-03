@@ -3,6 +3,7 @@
 
 import torch
 from torch import nn
+from ..utils.sinusoidal_embedding import SinusoidalEmbedding
 
 
 class ResUNetResidualBlock(nn.Module):
@@ -10,6 +11,7 @@ class ResUNetResidualBlock(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
+        time_embedding_dim: int,
         input_is_data: bool = False,
         halve_size: bool = True,
     ) -> None:
@@ -37,6 +39,9 @@ class ResUNetResidualBlock(nn.Module):
             conv1_layers = conv1_layers[2:]
         self.conv1 = nn.Sequential(*conv1_layers)
 
+        # Time embedding projection
+        self.time_proj = nn.Linear(time_embedding_dim, out_channels)
+
         self.skip_conv: nn.Module
         if in_channels == out_channels and not halve_size:
             self.skip_conv = nn.Identity()
@@ -60,15 +65,19 @@ class ResUNetResidualBlock(nn.Module):
         ]
         self.conv2 = nn.Sequential(*conv2_layers)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, t_emb: torch.Tensor) -> torch.Tensor:
         x1 = self.conv1(x)
+        
+        # Add time embedding: (B, C, 1, 1)
+        x1 = x1 + self.time_proj(t_emb)[:, :, None, None]
+        
         x2 = self.conv2(x1)
         return self.skip_conv(x) + x2
 
 
 class ResUNetEncoderBlock(nn.Module):
     def __init__(
-        self, in_channels: int, out_channels: int, input_is_data: bool = False
+        self, in_channels: int, out_channels: int, time_embedding_dim: int, input_is_data: bool = False
     ) -> None:
         super().__init__()
 
@@ -79,16 +88,17 @@ class ResUNetEncoderBlock(nn.Module):
         self.res_block = ResUNetResidualBlock(
             in_channels=in_channels,
             out_channels=out_channels,
+            time_embedding_dim=time_embedding_dim,
             input_is_data=input_is_data,
             halve_size=not input_is_data,
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.res_block(x)
+    def forward(self, x: torch.Tensor, t_emb: torch.Tensor) -> torch.Tensor:
+        return self.res_block(x, t_emb)
 
 
 class ResUNetDecoderBlock(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, skip_channels: int) -> None:
+    def __init__(self, in_channels: int, out_channels: int, skip_channels: int, time_embedding_dim: int) -> None:
         super().__init__()
 
         self.in_channels = in_channels
@@ -100,17 +110,18 @@ class ResUNetDecoderBlock(nn.Module):
         self.res_block = ResUNetResidualBlock(
             in_channels=in_channels + skip_channels,
             out_channels=out_channels,
+            time_embedding_dim=time_embedding_dim,
             input_is_data=False,
             halve_size=False,
         )
 
-    def forward(self, x: torch.Tensor, skip: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, skip: torch.Tensor, t_emb: torch.Tensor) -> torch.Tensor:
         x1 = self.upsampler(x)
-        return self.res_block(torch.cat([x1, skip], dim=1))
+        return self.res_block(torch.cat([x1, skip], dim=1), t_emb)
 
 
 class ResUNetBridgeBlock(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int) -> None:
+    def __init__(self, in_channels: int, out_channels: int, time_embedding_dim: int) -> None:
         super().__init__()
 
         self.in_channels = in_channels
@@ -119,12 +130,13 @@ class ResUNetBridgeBlock(nn.Module):
         self.res_block = ResUNetResidualBlock(
             in_channels=in_channels,
             out_channels=out_channels,
+            time_embedding_dim=time_embedding_dim,
             input_is_data=False,
             halve_size=True,
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.res_block(x)
+    def forward(self, x: torch.Tensor, t_emb: torch.Tensor) -> torch.Tensor:
+        return self.res_block(x, t_emb)
 
 
 class ResUNet(nn.Module):
@@ -134,15 +146,26 @@ class ResUNet(nn.Module):
         output_dim: int,
         layer_dims: list[int],
         bridge_dim: int,
+        time_embedding_dim: int,
     ) -> None:
         super().__init__()
 
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.layer_dims = layer_dims
+        self.bridge_dim = bridge_dim
+        self.time_embedding_dim = time_embedding_dim
 
         encoder_dims = layer_dims
         decoder_dims = layer_dims[::-1]
+        
+        # Time embedding
+        self.time_embedder = SinusoidalEmbedding(time_embedding_dim)
+        self.time_mlp = nn.Sequential(
+            nn.Linear(time_embedding_dim, time_embedding_dim * 4),
+            nn.ReLU(),
+            nn.Linear(time_embedding_dim * 4, time_embedding_dim),
+        )
 
         # Encoder blocks
         self.encoders = nn.ModuleList()
@@ -152,13 +175,16 @@ class ResUNet(nn.Module):
                 ResUNetEncoderBlock(
                     in_channels=encoder_in_channels,
                     out_channels=encoder_dims[i],
+                    time_embedding_dim=time_embedding_dim,
                     input_is_data=(i == 0),
                 )
             )
 
         # Bridge block
         self.bridge = ResUNetBridgeBlock(
-            in_channels=encoder_dims[-1], out_channels=bridge_dim
+            in_channels=encoder_dims[-1], 
+            out_channels=bridge_dim,
+            time_embedding_dim=time_embedding_dim,
         )
 
         # Decoder blocks
@@ -171,6 +197,7 @@ class ResUNet(nn.Module):
                     in_channels=decoder_in_channels,
                     out_channels=decoder_dims[i],
                     skip_channels=skip_channels,
+                    time_embedding_dim=time_embedding_dim,
                 )
             )
 
@@ -181,20 +208,23 @@ class ResUNet(nn.Module):
             kernel_size=1,
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+        # Time embedding
+        t_emb = self.time_mlp(self.time_embedder(t))
+
         # Encoder path
         skips = []
         for encoder in self.encoders:
-            x = encoder(x)
+            x = encoder(x, t_emb)
             skips.append(x)
 
         # Bridge
-        x = self.bridge(x)
+        x = self.bridge(x, t_emb)
 
         # Decoder path
         for decoder in self.decoders:
             skip = skips.pop()
-            x = decoder(x, skip)
+            x = decoder(x, skip, t_emb)
 
         # Final output convolution
         return self.output_conv(x)

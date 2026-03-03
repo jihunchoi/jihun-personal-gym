@@ -1,0 +1,21 @@
+[project]
+name = "ddpm"
+version = "0.1.0"
+description = "Denoising Diffusion Probabilistic Models (DDPM) implementation"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "diffusion-common",
+    "pyrefly>=0.54.0",
+    "ruff>=0.15.2",
+    "torch>=2.10.0",
+]
+
+[tool.uv.sources]
+diffusion-common = { path = "../diffusion-common" }
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+
+[tool.pyrefly]
+project_includes = ["main.py", "*.ipynb"]

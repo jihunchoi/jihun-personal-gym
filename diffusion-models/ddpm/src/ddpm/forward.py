@@ -1,5 +1,6 @@
 # Forward process of DDPM.
 from collections.abc import Sequence
+
 import torch
 from torch import nn
 
@@ -19,7 +20,7 @@ class DDPMForwardProcess(nn.Module):
         return torch.randn(shape, device=device)
 
     def add_noise(
-        self, x_0: torch.Tensor, noise: torch.Tensor, t: int | torch.Tensor
+        self, x_0: torch.Tensor, noise: torch.Tensor, t: torch.Tensor
     ) -> torch.Tensor:
         """
         Adds noise to x_0 according to the schedule:
@@ -28,8 +29,7 @@ class DDPMForwardProcess(nn.Module):
         Args:
             x_0: Original image tensor (N, C, H, W)
             noise: Gaussian noise tensor (N, C, H, W)
-            t: Integer or tensor step index,
-                or tensor of shape (N,) with step indices for each sample in the batch.
+            t: Tensor of shape (N,) with step indices for each sample in the batch.
 
         Returns:
             x_t: Noisy image tensor (N, C, H, W)
@@ -37,14 +37,15 @@ class DDPMForwardProcess(nn.Module):
         device = x_0.device
         alpha_bars = self.alpha_bars.to(device)
 
-        t = torch.as_tensor(t, device=device)
+        if not isinstance(t, torch.Tensor):
+            raise TypeError(f"t must be a torch.Tensor, but got {type(t)}")
 
-        if t.ndim == 0:
-            t = t.unsqueeze(0)  # Convert scalar to tensor of shape (1,)
-        elif t.ndim == 1:
-            assert t.shape[0] == x_0.shape[0]
-        else:
-            raise ValueError("t must be a scalar or a 1D tensor with shape (N,)")
+        t = t.to(device)
+
+        if t.ndim != 1 or t.shape[0] != x_0.shape[0]:
+            raise ValueError(
+                f"t must be a 1D tensor with shape ({x_0.shape[0]},), but got shape {t.shape}"
+            )
 
         alpha_bar_reshaped = alpha_bars[t].view(-1, 1, 1, 1)  # Reshape for broadcasting
         x_t = alpha_bar_reshaped * x_0 + torch.sqrt(1 - alpha_bar_reshaped**2) * noise
@@ -52,15 +53,14 @@ class DDPMForwardProcess(nn.Module):
         return x_t
 
     def forward(
-        self, x_0: torch.Tensor, t: int | torch.Tensor
+        self, x_0: torch.Tensor, t: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Samples noise and applies the forward process to x_0 at step t.
 
         Args:
             x_0: Original image tensor (N, C, H, W)
-            t: Integer or tensor step index,
-                or tensor of shape (N,) with step indices for each sample in the batch.
+            t: Tensor of shape (N,) with step indices for each sample in the batch.
 
         Returns:
             x_t: Noisy image at step t

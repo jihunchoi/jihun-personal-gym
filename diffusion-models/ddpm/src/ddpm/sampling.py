@@ -24,14 +24,13 @@ class DDPMSampler(nn.Module):
         self.register_buffer("one_minus_squared_alphas", 1.0 - self.alphas**2)
         self.register_buffer("one_minus_squared_alpha_bars", 1.0 - self.alpha_bars**2)
 
-        indices = torch.arange(len(betas), dtype=torch.long)
-        squared_sigmas = torch.zeros_like(indices)
+        squared_sigmas = torch.zeros_like(self.betas)
         squared_sigmas[1:] = (
-            self.one_minus_squared_alpha_bars[indices[1:] - 1]
-            / self.one_minus_squared_alpha_bars[indices[1:]]
-            * self.betas[indices[1:]] ** 2
+            self.one_minus_squared_alpha_bars[:-1]
+            / self.one_minus_squared_alpha_bars[1:]
+            * self.betas[1:] ** 2
         )
-        self.register_buffer("squared_sigmas", squared_sigmas)
+        self.register_buffer("sigmas", torch.sqrt(squared_sigmas))
 
         self.noise_predictor = noise_predictor
 
@@ -74,6 +73,6 @@ class DDPMSampler(nn.Module):
                     * predicted_noise
                 )
             )
-            + self.squared_sigmas[t_reshaped] * true_noise
+            + self.sigmas[t_reshaped] * true_noise
         )
         return x_t_minus_1, predicted_noise

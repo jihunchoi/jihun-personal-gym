@@ -27,7 +27,7 @@ class SimpleDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        return self.data[index]
+        return self.data[index], 0
 
 
 def test_trainer_initialization():
@@ -105,36 +105,37 @@ def test_trainer_train_multiple_epochs(capsys):
     assert "Epoch 1/2" in captured.err
     assert "Epoch 2/2" in captured.err
 
+
 def test_trainer_checkpointing(tmp_path):
     betas = [0.1, 0.2]
     forward_process = DDPMForwardProcess(betas)
     decoder = MockDecoder()
     trainer = DDPMTrainer(decoder, forward_process)
-    
+
     dataset = SimpleDataset(size=2)
     dataloader = DataLoader(dataset, batch_size=2)
     optimizer = torch.optim.SGD(decoder.parameters(), lr=0.1)
-    
+
     checkpoint_dir = tmp_path / "checkpoints"
     num_epochs = 2
-    
+
     trainer.train(
-        dataloader, 
-        optimizer, 
-        num_epochs=num_epochs, 
+        dataloader,
+        optimizer,
+        num_epochs=num_epochs,
         checkpoint_dir=checkpoint_dir,
-        checkpoint_freq=1
+        checkpoint_freq=1,
     )
-    
+
     # Check if checkpoint files exist
     assert (checkpoint_dir / "checkpoint_epoch_1.pt").exists()
     assert (checkpoint_dir / "checkpoint_epoch_2.pt").exists()
-    
+
     # Load and verify content of the last checkpoint
     checkpoint = torch.load(checkpoint_dir / "checkpoint_epoch_2.pt", weights_only=True)
-    assert checkpoint["epoch"] == 1 # 0-indexed epoch stored
+    assert checkpoint["epoch"] == 1  # 0-indexed epoch stored
     assert "model_state_dict" in checkpoint
     assert "optimizer_state_dict" in checkpoint
-    
+
     # Check if weights were saved correctly
     assert torch.allclose(checkpoint["model_state_dict"]["param"], decoder.param)

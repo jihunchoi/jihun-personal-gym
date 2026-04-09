@@ -1,0 +1,7 @@
+[project]
+name = "diffusion-models"
+version = "0.1.0"
+description = "Noise-Conditional Score Network (NCSN) implementation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []

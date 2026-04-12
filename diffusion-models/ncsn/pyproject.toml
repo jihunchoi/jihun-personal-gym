@@ -1,5 +1,5 @@
 [project]
-name = "diffusion-models"
+name = "ncsn"
 version = "0.1.0"
 description = "Noise-Conditional Score Network (NCSN) implementation"
 readme = "README.md"

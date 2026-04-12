@@ -1,5 +1,5 @@
 def main():
-    print("Hello from diffusion-models!")
+    print("Hello from ncsn!")
 
 
 if __name__ == "__main__":

@@ -34,11 +34,13 @@ This is the problem of approximating $p(\mathbf{x}_{i-1} | \mathbf{x}_i)$ using 
 
 To avoid computing the intractable true marginal $p_i (\mathbf{x}_i) = \int p_i (\mathbf{x}_i | \mathbf{x}_0) p_{\text{data}}(\mathbf{x}_0) d\mathbf{x}_0$,
 DDPMs additionally condition the reverse transition kernel on $\mathbf{x} = \mathbf{x}_0$:
+
 $$
 p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x})
 = p(\mathbf{x}_i | \mathbf{x}_{i-1}, \mathbf{x}) \frac{p(\mathbf{x}_{i-1} | \mathbf{x})}{p(\mathbf{x}_i | \mathbf{x})}
 = p(\mathbf{x}_i | \mathbf{x}_{i-1}) \frac{p(\mathbf{x}_{i-1} | \mathbf{x})}{p(\mathbf{x}_i | \mathbf{x})},
 $$
+
 where the second equivalence is due to the Markov property of the forward process.
 
 From Theorem 2.2.1 in the textbook, it is known that
@@ -48,10 +50,13 @@ and the minimizer satisfies
 $p^* (\mathbf{x}_{i-1} | \mathbf{x}_i) = \mathbb{E}_{p(\mathbf{x}|\mathbf{x_i})} \left[ p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x}) \right] = p(\mathbf{x}_{i-1} | \mathbf{x}_i)$.
 
 Importantly, $p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x})$ has the closed-form expression:
+
 $$
 p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x}) = \mathcal{N} \left( \mathbf{x}_{i-1} ; \boldsymbol{\mu}(\mathbf{x}_i, \mathbf{x}, i), \sigma^2(i) \mathbf{I} \right),
 $$
+
 where
+
 $$
 \boldsymbol{\mu}(\mathbf{x}_i, \mathbf{x}, i) :=
 \frac{\overline{\alpha}_{i-1} \beta_i^2}{1 - \overline{\alpha}_i^2}\mathbf{x}
@@ -61,6 +66,7 @@ $$
 
 When training, since $\sigma^2(i)$ is fixed, $p_{\boldsymbol{\phi}}$ could be modeled by a learnable mean function $\boldsymbol{\mu}_{\boldsymbol{\phi}}(\cdot, i)$,
 where the target objective is the average of KL divergences for all layers, averaged over the data distribution:
+
 $$
 \mathcal{L}_{\text{DDPM}} (\boldsymbol{\phi}) :=
     \sum_{i=1}^L {
@@ -79,16 +85,19 @@ Practically, instead of predicting the mean function, the equivalent $\boldsymbo
 
 $\boldsymbol{\mu}(\mathbf{x}_i,\mathbf{x}_0, i)$ can be rewritten as a function of $\boldsymbol{\epsilon}$
 from the fact $\mathbf{x}_i = \overline{\alpha}_i \mathbf{x}_0 + \sqrt{1 - \overline{\alpha}_i^2} \boldsymbol{\epsilon}$:
+
 $$
 \boldsymbol{\mu}(\mathbf{x}_i,\mathbf{x}_0, i) = \frac{1}{\alpha_i} \left( \mathbf{x}_i - \frac{1 - \alpha_i^2}{\sqrt{1 - \overline{\alpha}_i^2}} \boldsymbol{\epsilon} \right).
 $$
 
 This suggests parameterizing $\boldsymbol{\mu}_{\boldsymbol{\phi}}$ using a learnable function $\boldsymbol{\epsilon}_{\boldsymbol{\phi}}$:
+
 $$
 \boldsymbol{\mu}_{\boldsymbol{\phi}}(\mathbf{x}_i, i) = \frac{1}{\alpha_i} \left( \mathbf{x}_i - \frac{1 - \alpha_i^2}{\sqrt{1 - \overline{\alpha}_i^2}} \boldsymbol{\epsilon}_{\boldsymbol{\phi}} (\mathbf{x}_i, i) \right).
 $$
 
 Further, $\mathcal{L}_{\text{DDPM}}$ simplifies to finding $\boldsymbol{\epsilon}_{\boldsymbol{\phi}} (\mathbf{x}_i, i)$ that minimizes:
+
 $$
 \mathcal{L}_{\text{simple}} (\boldsymbol{\phi}) :=
     \mathbb{E}_i \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}} \mathbb{E}_{\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})}
@@ -96,11 +105,13 @@ $$
         \lVert \boldsymbol{\epsilon}_{\boldsymbol{\phi}} (\mathbf{x}_i, i) - \boldsymbol{\epsilon} \rVert_2^2
     \right].
 $$
+
 Dropping the per-term weights (present in the exact derivation) was found to be beneficial for sample quality in [Ho et al. (2020)](https://arxiv.org/pdf/2006.11239), as it up-weights the harder denoising tasks at larger $i$.
 
 #### Sampling
 
 After training, sampling proceeds sequentially from $\mathbf{x}_L \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$ back to $\mathbf{x}_0$:
+
 $$
 \mathbf{x}_{i-1} \leftarrow
 \frac{1}{\alpha_i} \left(

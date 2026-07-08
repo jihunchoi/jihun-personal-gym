@@ -12,47 +12,50 @@ The process used in noising a data sample into a noise from Gaussian.
 
 Let a data sample be $\mathbf{x}=\mathbf{x}_0$ and the number of iterations $L$.
 
-Then, the transition is defined by $p(\mathbf{x}_i | \mathbf{x}_{i-1}) := \mathcal{N}(\mathbf{x}_i ; \alpha_i \mathbf{x}_{i-1}, \beta_i^2 \mathbf{I})$,
+Then, the transition is defined by $p(\mathbf{x}_i \mid \mathbf{x}_{i-1}) := \mathcal{N}(\mathbf{x}_i ; \alpha_i \mathbf{x}_{i-1}, \beta_i^2 \mathbf{I})$,
 where $\alpha_i := \sqrt{1 - \beta_i^2}$ and $\beta_i \in (0,1)$ is a pre-defined noise parameter.
 
 Alternatively, the above could be written as $\mathbf{x}_i = \alpha_i \mathbf{x}_{i-1} + \beta_i \boldsymbol{\epsilon}_i$ where $\boldsymbol{\epsilon}_i \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$.
 
-Since an affine transformation of a normal distribution is again a normal distribution,
 we can obtain the closed-form expression for the distribution at step $i$ given the data sample $\mathbf{x}_0$ by recursively applying the transitions:
-$$\mathbf{x}_i = \overline{\alpha}_i \mathbf{x}_0 + \sqrt{1 - \overline{\alpha}_i^2} \boldsymbol{\epsilon},$$
+
+$$
+\mathbf{x}_i = \overline{\alpha}_i \mathbf{x}_0 + \sqrt{1 - \overline{\alpha}_i^2} \boldsymbol{\epsilon},
+$$
+
 where $\overline{\alpha}_i := \prod_{k=1}^i \alpha_k$.
 
 Assuming that $\{ \beta_i \}_{i=1}^L$ is an increasing sequence, $\overline{\alpha}_i \rightarrow 0$ as $L \rightarrow \infty$, since
 $0 \leq \prod_{k=1}^\infty \sqrt{1 - \beta_k^2} \leq \prod_{k=1}^\infty \sqrt{1 - \beta_1^2} = 0$;
-which indicates $p_L(\mathbf{x}_L | \mathbf{x}_0) \rightarrow \mathcal{N}(\mathbf{0}, \mathbf{I})$ as $L \rightarrow \infty$.
+which indicates $p_L(\mathbf{x}_L \mid \mathbf{x}_0) \rightarrow \mathcal{N}(\mathbf{0}, \mathbf{I})$ as $L \rightarrow \infty$.
 
 ### Reverse denoising process (trainable)
 
 The process used in denoising a Gaussian noise into a point from the data distribution.
 
-This is the problem of approximating $p(\mathbf{x}_{i-1} | \mathbf{x}_i)$ using a parametric model $p_{\boldsymbol{\phi}} (\mathbf{x}_{i-1} | \mathbf{x}_i)$.
+This is the problem of approximating $p(\mathbf{x}_{i-1} \mid \mathbf{x}_i)$ using a parametric model $p_{\boldsymbol{\phi}} (\mathbf{x}_{i-1} \mid \mathbf{x}_i)$.
 
-To avoid computing the intractable true marginal $p_i (\mathbf{x}_i) = \int p_i (\mathbf{x}_i | \mathbf{x}_0) p_{\text{data}}(\mathbf{x}_0) d\mathbf{x}_0$,
+To avoid computing the intractable true marginal $p_i (\mathbf{x}_i) = \int p_i (\mathbf{x}_i \mid \mathbf{x}_0) p_{\text{data}}(\mathbf{x}_0) d\mathbf{x}_0$,
 DDPMs additionally condition the reverse transition kernel on $\mathbf{x} = \mathbf{x}_0$:
 
 $$
-p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x})
-= p(\mathbf{x}_i | \mathbf{x}_{i-1}, \mathbf{x}) \frac{p(\mathbf{x}_{i-1} | \mathbf{x})}{p(\mathbf{x}_i | \mathbf{x})}
-= p(\mathbf{x}_i | \mathbf{x}_{i-1}) \frac{p(\mathbf{x}_{i-1} | \mathbf{x})}{p(\mathbf{x}_i | \mathbf{x})},
+p(\mathbf{x}_{i-1} \mid \mathbf{x}_i, \mathbf{x})
+= p(\mathbf{x}_i \mid \mathbf{x}_{i-1}, \mathbf{x}) \frac{p(\mathbf{x}_{i-1} \mid \mathbf{x})}{p(\mathbf{x}_i \mid \mathbf{x})}
+= p(\mathbf{x}_i \mid \mathbf{x}_{i-1}) \frac{p(\mathbf{x}_{i-1} \mid \mathbf{x})}{p(\mathbf{x}_i \mid \mathbf{x})},
 $$
 
 where the second equivalence is due to the Markov property of the forward process.
 
 From Theorem 2.2.1 in the textbook, it is known that
-$\mathbb{E}_{p_i(\mathbf{x}_i)} \left[ \mathcal{D}_{KL} \left( p(\mathbf{x}_{i-1} | \mathbf{x}_i) \Vert p_{\boldsymbol{\phi}} (\mathbf{x}_{i-1} | \mathbf{x}_i) \right) \right]$ is equivalent to
-$\mathbb{E}_{p_{\text{data}}(\mathbf{x})} \mathbb{E}_{p(\mathbf{x}_i|\mathbf{x})} \left[ \mathcal{D}_{KL} \left( p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x}) \Vert p_{\boldsymbol{\phi}} (\mathbf{x}_{i-1} | \mathbf{x}_i) \right) \right]$ up to a constant independent of $\boldsymbol{\phi}$,
+$\mathbb{E}_{p_i(\mathbf{x}_i)} \left[ \mathcal{D}_{KL} \left( p(\mathbf{x}_{i-1} \mid \mathbf{x}_i) \Vert p_{\boldsymbol{\phi}} (\mathbf{x}_{i-1} \mid \mathbf{x}_i) \right) \right]$ is equivalent to
+$\mathbb{E}_{p_{\text{data}}(\mathbf{x})} \mathbb{E}_{p(\mathbf{x}_i \mid \mathbf{x})} \left[ \mathcal{D}_{KL} \left( p(\mathbf{x}_{i-1} \mid \mathbf{x}_i, \mathbf{x}) \Vert p_{\boldsymbol{\phi}} (\mathbf{x}_{i-1} \mid \mathbf{x}_i) \right) \right]$ up to a constant independent of $\boldsymbol{\phi}$,
 and the minimizer satisfies
-$p^* (\mathbf{x}_{i-1} | \mathbf{x}_i) = \mathbb{E}_{p(\mathbf{x}|\mathbf{x_i})} \left[ p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x}) \right] = p(\mathbf{x}_{i-1} | \mathbf{x}_i)$.
+$p^* (\mathbf{x}_{i-1} \mid \mathbf{x}_i) = \mathbb{E}_{p(\mathbf{x} \mid \mathbf{x}_i)} \left[ p(\mathbf{x}_{i-1} \mid \mathbf{x}_i, \mathbf{x}) \right] = p(\mathbf{x}_{i-1} \mid \mathbf{x}_i)$.
 
-Importantly, $p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x})$ has the closed-form expression:
+Importantly, $p(\mathbf{x}_{i-1} \mid \mathbf{x}_i, \mathbf{x})$ has the closed-form expression:
 
 $$
-p(\mathbf{x}_{i-1} | \mathbf{x}_i, \mathbf{x}) = \mathcal{N} \left( \mathbf{x}_{i-1} ; \boldsymbol{\mu}(\mathbf{x}_i, \mathbf{x}, i), \sigma^2(i) \mathbf{I} \right),
+p(\mathbf{x}_{i-1} \mid \mathbf{x}_i, \mathbf{x}) = \mathcal{N} \left( \mathbf{x}_{i-1} ; \boldsymbol{\mu}(\mathbf{x}_i, \mathbf{x}, i), \sigma^2(i) \mathbf{I} \right),
 $$
 
 where
@@ -72,16 +75,16 @@ $$
     \sum_{i=1}^L {
         \frac{1}{2\sigma^2(i)}
         \mathbb{E}_{\mathbf{x}_0 \sim p_{\text{data}}}
-        \mathbb{E}_{\mathbf{x}_i \sim p(\mathbf{x}_i | \mathbf{x}_0)}
+        \mathbb{E}_{\mathbf{x}_i \sim p(\mathbf{x}_i \mid \mathbf{x}_0)}
         \left[
             \lVert \boldsymbol{\mu}_{\boldsymbol{\phi}} (\mathbf{x}_i, i) - \boldsymbol{\mu}(\mathbf{x}_i, \mathbf{x}_0, i) \rVert_2^2
         \right]
     }.
 $$
 
-#### $\boldsymbol{\epsilon}$-prediction
+#### $\boldsymbol{\epsilon}\text{-prediction}$
 
-Practically, instead of predicting the mean function, the equivalent $\boldsymbol{\epsilon}$-prediction is widely used for simplicity.
+Practically, instead of predicting the mean function, the equivalent $\boldsymbol{\epsilon}\text{-prediction}$ is widely used for simplicity.
 
 $\boldsymbol{\mu}(\mathbf{x}_i,\mathbf{x}_0, i)$ can be rewritten as a function of $\boldsymbol{\epsilon}$
 from the fact $\mathbf{x}_i = \overline{\alpha}_i \mathbf{x}_0 + \sqrt{1 - \overline{\alpha}_i^2} \boldsymbol{\epsilon}$:

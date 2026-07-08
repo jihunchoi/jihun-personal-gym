@@ -117,48 +117,42 @@ The SM and DSM objectives are identical up to a constant: $`\mathcal{L}_{\text{S
 <details>
 <summary>Proof</summary>
 
-$`\displaystyle \begin{aligned}
-\mathcal{L}_{\text{SM}} (\boldsymbol{\phi}; \sigma)
-= \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) - \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \rVert_2^2 \right] \\
-&= \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2
+$`\displaystyle \mathcal{L}_{\text{SM}} (\boldsymbol{\phi}; \sigma)
+= \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) - \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \rVert_2^2 \right]`$<br>
+$`\displaystyle = \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2
     + \frac{1}{2} \lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \rVert_2^2
-    - \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle \right] \\
-&=\frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2 \right]
+    - \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle \right]`$<br>
+$`\displaystyle =\frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2 \right]
     + \frac{1}{2}  \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \rVert_2^2 \right]
-    - \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[\left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle \right]
-\end{aligned}`$
+    - \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[\left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle \right]`$
 
 The second term is independent to $`\boldsymbol{\phi}`$; let's denote it as $`C_1`$.
 
 The third term, $`\mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[\left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle \right]`$, could be expressed as:
 
-$`\displaystyle \begin{aligned}
-\mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle \right] \\
-&= \int_{\tilde{\mathbf{x}}} p_\sigma(\tilde{\mathbf{x}}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle d\tilde{\mathbf{x}} \\
-&= \int_{\tilde{\mathbf{x}}} p_\sigma(\tilde{\mathbf{x}}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \frac{\nabla_{\tilde{\mathbf{x}}} p_\sigma (\tilde{\mathbf{x}})}{p_\sigma{}(\tilde{\mathbf{x}})} \right\rangle d\tilde{\mathbf{x}} \\
-&= \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \nabla_{\tilde{\mathbf{x}}} p_\sigma (\tilde{\mathbf{x}}) \right\rangle d\tilde{\mathbf{x}} \\
-&= \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \nabla_{\tilde{\mathbf{x}}} \int_\mathbf{x} p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) d\mathbf{x} \right\rangle d\tilde{\mathbf{x}} \\
-&= \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \int_\mathbf{x} p_{\text{data}}(\mathbf{x}) \nabla_{\tilde{\mathbf{x}}} p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) d\mathbf{x} \right\rangle d\tilde{\mathbf{x}} \\
-&= \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \int_\mathbf{x} p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  d\mathbf{x} \right\rangle d\tilde{\mathbf{x}} \\
-&= \int_{\tilde{\mathbf{x}}} \int_\mathbf{x}  p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle d\mathbf{x} d\tilde{\mathbf{x}} \\
-&= \int_\mathbf{x} \int_{\tilde{\mathbf{x}}} p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle d\tilde{\mathbf{x}} d\mathbf{x}  \\
-&= \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}, \tilde{\mathbf{x}} \sim p_\sigma(\cdot | \mathbf{x})} \left[ \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle \right].
-\end{aligned}`$
+$`\displaystyle \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle \right]`$<br>
+$`\displaystyle = \int_{\tilde{\mathbf{x}}} p_\sigma(\tilde{\mathbf{x}}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \right\rangle d\tilde{\mathbf{x}}`$<br>
+$`\displaystyle = \int_{\tilde{\mathbf{x}}} p_\sigma(\tilde{\mathbf{x}}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \frac{\nabla_{\tilde{\mathbf{x}}} p_\sigma (\tilde{\mathbf{x}})}{p_\sigma{}(\tilde{\mathbf{x}})} \right\rangle d\tilde{\mathbf{x}}`$<br>
+$`\displaystyle = \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \nabla_{\tilde{\mathbf{x}}} p_\sigma (\tilde{\mathbf{x}}) \right\rangle d\tilde{\mathbf{x}}`$<br>
+$`\displaystyle = \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \nabla_{\tilde{\mathbf{x}}} \int_\mathbf{x} p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) d\mathbf{x} \right\rangle d\tilde{\mathbf{x}}`$<br>
+$`\displaystyle = \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \int_\mathbf{x} p_{\text{data}}(\mathbf{x}) \nabla_{\tilde{\mathbf{x}}} p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) d\mathbf{x} \right\rangle d\tilde{\mathbf{x}}`$<br>
+$`\displaystyle = \int_{\tilde{\mathbf{x}}} \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma), \int_\mathbf{x} p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  d\mathbf{x} \right\rangle d\tilde{\mathbf{x}}`$<br>
+$`\displaystyle = \int_{\tilde{\mathbf{x}}} \int_\mathbf{x}  p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle d\mathbf{x} d\tilde{\mathbf{x}}`$<br>
+$`\displaystyle = \int_\mathbf{x} \int_{\tilde{\mathbf{x}}} p_{\text{data}}(\mathbf{x}) p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle d\tilde{\mathbf{x}} d\mathbf{x}`$<br>
+$`\displaystyle = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}, \tilde{\mathbf{x}} \sim p_\sigma(\cdot | \mathbf{x})} \left[ \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle \right].`$
 
 Thus,
 
-$`\displaystyle \begin{aligned}
-\mathcal{L}_{\text{SM}} (\boldsymbol{\phi}; \sigma) \\
-&=\frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2 \right]
+$`\displaystyle \mathcal{L}_{\text{SM}} (\boldsymbol{\phi}; \sigma)`$<br>
+$`\displaystyle =\frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2 \right]
     - \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}, \tilde{\mathbf{x}} \sim p_\sigma(\cdot | \mathbf{x})} \left[ \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle \right]
-    + C_1 \\
-&=\frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2 \right]
-    - \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}, \tilde{\mathbf{x}} \sim p_\sigma(\cdot | \mathbf{x})} \left[ \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle \right] \\
-& \qquad + \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}| \mathbf{x}) \rVert_2^2
+    + C_1`$<br>
+$`\displaystyle =\frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma) \rVert_2^2 \right]
+    - \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}, \tilde{\mathbf{x}} \sim p_\sigma(\cdot | \mathbf{x})} \left[ \left\langle \mathbf{s}_{\boldsymbol{\phi}} (\tilde{\mathbf{x}}; \sigma),  \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x})  \right\rangle \right]`$<br>
+$`\displaystyle \qquad + \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}| \mathbf{x}) \rVert_2^2
     - \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}} | \mathbf{x}) \rVert_2^2
-    + C_1 \\
-&= \mathcal{L}_{\text{DSM}} (\boldsymbol{\phi}; \sigma) + C_1 - \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})}\lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}| \mathbf{x}) \rVert_2^2.
-\end{aligned}`$
+    + C_1`$<br>
+$`\displaystyle = \mathcal{L}_{\text{DSM}} (\boldsymbol{\phi}; \sigma) + C_1 - \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})}\lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}| \mathbf{x}) \rVert_2^2.`$
 
 Again, since the last term doesn't depend on $`\boldsymbol{\phi}`$, we can treat it as a constant with respect to parameters, which completes the proof,
 with $`C = \frac{1}{2}  \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \left[ \lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}) \rVert_2^2 \right] - \frac{1}{2} \mathbb{E}_{\tilde{\mathbf{x}} \sim p_\sigma(\tilde{\mathbf{x}})} \lVert \nabla_{\tilde{\mathbf{x}}} \log p_\sigma (\tilde{\mathbf{x}}| \mathbf{x}) \rVert_2^2`$.
